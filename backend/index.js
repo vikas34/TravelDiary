@@ -1,6 +1,5 @@
 require("dotenv").config();
 
-const config = require("./config.json");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const express = require("express");
@@ -15,7 +14,11 @@ const { authenticateToken } = require("./utilities");
 const User = require("./models/user.model");
 const TravelStory = require("./models/travelStory.model");
 
-mongoose.connect(config.connectionString);
+// Connect to MongoDB using environment variable
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("✅ MongoDB connected successfully"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 const app = express();
 app.use(express.json());
@@ -357,7 +360,7 @@ app.get("/travel-stories/filter", authenticateToken, async (req, res) => {
       visitedDate: { $gte: start, $lte: end },
     }).sort({ isFavourite: -1 });
 
-    res.status(200).json({stories: filteredStories});
+    res.status(200).json({ stories: filteredStories });
   } catch (error) {
     res.status(500).json({ error: true, message: error.message });
   }
